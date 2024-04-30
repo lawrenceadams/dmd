@@ -1,7 +1,9 @@
+use std::fmt::format;
+
 use serde::{Deserialize, Serialize};
 
 fn main() {
-    let data = match fetch_data() {
+    let data = match fetch_latest_release_metadata(24) {
         Ok(data) => data,
         Err(_) => panic!("Something gone very wrong"),
     };
@@ -43,9 +45,9 @@ pub struct Release {
     pub public_key_id: i64,
 }
 
-fn fetch_data() -> Result<Root, reqwest::Error> {
+fn fetch_latest_release_metadata(release_id: u8) -> Result<Root, reqwest::Error> {
     let todo =
-        reqwest::blocking::get("https://isd.digital.nhs.uk/trud/api/v1/keys/f8b4b8e10055dfb6b34eb1fa7c114bd22db8201a/items/24/releases?latest")?.json::<Root>()?;
+        reqwest::blocking::get(format!("https://isd.digital.nhs.uk/trud/api/v1/keys/f8b4b8e10055dfb6b34eb1fa7c114bd22db8201a/items/{release_id}/releases?latest"))?.json::<Root>()?;
 
     Ok(todo)
 }
