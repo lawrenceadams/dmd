@@ -1,5 +1,4 @@
 use std::io::{Read, Seek, Write};
-
 use serde::{Deserialize, Serialize};
 
 fn main() {
