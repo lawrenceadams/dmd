@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use serde::{Deserialize, Serialize};
 
 fn main() {
@@ -11,7 +9,7 @@ fn main() {
     println!("{:?}", data.releases.first().unwrap().name);
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Root {
     pub api_version: String,
@@ -20,7 +18,7 @@ pub struct Root {
     pub message: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Release {
     pub id: String,
