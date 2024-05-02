@@ -49,7 +49,7 @@ impl std::fmt::Display for BadFileHash {
 
 pub fn fetch_latest_release_metadata(
     release_id: u8,
-    trud_key: String,
+    trud_key: &str,
 ) -> Result<Root, reqwest::Error> {
     let todo = reqwest::blocking::get(format!(
         "https://isd.digital.nhs.uk/trud/api/v1/keys/{trud_key}/items/{release_id}/releases?latest"
@@ -60,33 +60,36 @@ pub fn fetch_latest_release_metadata(
 }
 
 pub fn get_and_validate_file(release: &Release) -> Result<(), Box<dyn std::error::Error>> {
+    println!("Downloading file.");
     let handle = reqwest::blocking::get(&release.archive_file_url)?;
-    let mut _file = std::fs::File::options()
+    let mut file = std::fs::File::options()
         .create(true)
         .read(true)
         .write(true)
+        .truncate(true)
         .open("./dmd.zip")
         .expect("Unable to create file.");
 
-    _file
-        .write_all(&handle.bytes()?)
-        .expect("Unable to write file.");
+    file.write_all(
+        &handle
+            .bytes()
+            .expect("Unable to get bytes from file handle."),
+    )
+    .expect("Unable to write file.");
 
     println!(
         "  File size approx {} MB",
-        _file
-            .metadata()
-            .expect("Unable to read file metadata")
-            .len()
-            / 1024
-            / 1024
+        file.metadata().expect("Unable to read file metadata").len() / 1024 / 1024
     );
 
-    println!("Ensuring file integrity maintained.");
+    println!("Ensuring file integrity maintained...");
 
-    match validate_file_hash(_file, &release.archive_file_sha256) {
-        Ok(()) => return Ok(()),
-        Err(BadFileHash) => panic!("Bad file hash. Cannot continue: {}", BadFileHash),
+    match validate_file_hash(file, &release.archive_file_sha256) {
+        Ok(()) => {
+            println!("  Ok. (SHA256: {})", &release.archive_file_sha256);
+            Ok(())
+        }
+        Err(BadFileHash) => panic!("Bad file hash. Cannot continue: {BadFileHash}"),
     }
 }
 
